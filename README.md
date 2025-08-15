@@ -7,14 +7,14 @@
 </div>
 
 <p align="center">
-  <a href="https://github.com/CodeWithKhoa/AUTO_GET_SSL/blob/main/LICENSE">
+  <a href="https://github.com/CodeWithKhoa/CertPanel/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
   </a>
   <a href="#">
     <img src="https://img.shields.io/badge/PHP-%3E%3D5.6-blue.svg" alt="PHP Version">
   </a>
-  <a href="https://github.com/CodeWithKhoa/AUTO_GET_SSL/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/CodeWithKhoa/AUTO_GET_SSL/main.yml?branch=main" alt="Build Status">
+  <a href="https://github.com/CodeWithKhoa/CertPanel/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/CodeWithKhoa/CertPanel/main.yml?branch=main" alt="Build Status">
   </a>
 </p>
 
@@ -23,7 +23,7 @@
 ## 1. 🎯 Introduction & Goal
 
 ### Overview
-**Auto Get SSL** is a toolset built with PHP, designed to completely eliminate the complexity of installing and maintaining SSL certificates. By leveraging the ACMEv2 protocol and integrating deeply with the cPanel API, this tool provides a "set-it-and-forget-it" solution for website security.
+**CertPanel** is a toolset built with PHP, designed to completely eliminate the complexity of installing and maintaining SSL certificates. By leveraging the ACMEv2 protocol and integrating deeply with the cPanel API, this tool provides a "set-it-and-forget-it" solution for website security.
 
 ### The Problem to Solve
 Manual SSL installation is often time-consuming, prone to errors, and requires technical knowledge. Free certificates also demand periodic renewal (typically every 90 days). Forgetting to renew can lead to website downtime and a loss of user trust.
@@ -40,7 +40,7 @@ This tool automates the entire process: from proving domain ownership and obtain
 -   **🌐 Multi-CA Support**: Avoids vendor lock-in. You can easily change the Certificate Authority (CA) endpoint in the `getssl.php` file.
 -   **🔗 Secure cPanel API Integration**: Uses the official cPanel API for installation, ensuring maximum compatibility and security.
 -   **🔌 Simple Deployment**: No Composer or complex frameworks required. All you need is PHP and a few common extensions.
--   **🛡️ Secure by Design**: Comes with a `.htaccess` file to protect sensitive key files and encourages the use of a separate configuration file.
+-   **🛡️ Secure by Design**: Comes with a `.htaccess` file to protect sensitive key files generated during the process.
 
 ---
 
@@ -48,9 +48,9 @@ This tool automates the entire process: from proving domain ownership and obtain
 
 The tool consists of three main components working in coordination:
 
-1.  **User Interface (`index.php`)**: Provides the web interface for the user to initiate the process.
-2.  **SSL Issuance Core (`getssl.php`)**: Responsible for communicating with the ACME CA.
-3.  **cPanel Installer Core (`installssl.php`)**: Responsible for communicating with the cPanel API.
+1.  **User Interface (`index.php`)**: Provides the web form for the user to enter their credentials and initiate the process.
+2.  **SSL Issuance Core (`getssl.php`)**: Responsible for communicating with the ACME CA to obtain the certificate.
+3.  **cPanel Installer Core (`installssl.php`)**: Responsible for communicating with the cPanel API to install the certificate.
 
 ### Detailed Workflow
 
@@ -59,7 +59,7 @@ The tool consists of three main components working in coordination:
 
 1.  The user clicks the **"Get SSL"** button in the UI.
 2.  `getssl.php` is triggered. The script checks if the current certificate needs renewal.
-3.  If needed, the script connects to the ACME CA and requests a new certificate for the domain.
+3.  If a new certificate is needed, the script connects to the ACME CA and requests one for the domain.
 4.  The CA requests domain ownership verification via the `http-01 challenge`.
 5.  `getssl.php` automatically creates a temporary file containing a special token at the `/.well-known/acme-challenge/` path.
 6.  The CA accesses that path to verify it. If successful, the CA issues the certificate.
@@ -70,14 +70,14 @@ The tool consists of three main components working in coordination:
 
 1.  The user clicks the **"Install SSL"** button after receiving the success message.
 2.  `installssl.php` is triggered. The script reads the contents of the saved `.pem` files.
-3.  It uses the login credentials from `config.php` to create an API request to cPanel's `SSL::install_ssl` endpoint.
+3.  It uses the login credentials **entered by the user in the web form** to create an API request to cPanel's `SSL::install_ssl` endpoint.
 4.  The entire certificate chain and private key are sent to cPanel.
 5.  cPanel processes the request, installs the certificate into the corresponding virtual host, and activates HTTPS for the domain.
 6.  The response from the cPanel API is returned and displayed in the UI.
 
 ---
 
-## 4. 🚀 Installation & Configuration Guide
+## 4. 🚀 Installation Guide
 
 ### Prerequisites
 Before you begin, ensure you have:
@@ -87,52 +87,36 @@ Before you begin, ensure you have:
 -   Write permissions for the PHP script in the deployment directory.
 
 ### Installation Steps
-1.  **Clone the repository to your hosting:**
+1.  **Clone or download the repository to your hosting:**
     ```bash
-    git clone [https://github.com/CodeWithKhoa/AUTO_GET_SSL.git](https://github.com/CodeWithKhoa/AUTO_GET_SSL.git)
+    git clone [https://github.com/CodeWithKhoa/CertPanel.git](https://github.com/CodeWithKhoa/CertPanel.git)
     ```
 
 2.  **Navigate into the project directory:**
     ```bash
-    cd AUTO_GET_SSL
+    cd CertPanel
     ```
-
-3.  **Secure Configuration (Most Important Step):**
-    -   Create a copy of the example configuration file and name it `config.php`. This command does it for you:
-        ```bash
-        cp config.example.php config.php
-        ```
-    -   Open `config.php` and fill in your exact cPanel login credentials:
-        ```php
-        <?php
-        // cPanel Login Credentials
-        define('CPANEL_USER', 'your_cpanel_username');
-        define('CPANEL_PASSWORD', 'your_cpanel_password');
-        define('CPANEL_HOST', 'your_server_ip');
-        ?>
-        ```
-    -   The `config.php` file is already listed in `.gitignore` to ensure it is never committed to your repository.
+3.  That's it. There are no configuration files to edit. The tool is ready to use.
 
 ---
 
 ## 5. 📖 Usage Guide
 
-
-
 1.  Open your web browser and navigate to the `index.php` file on your domain.
-2.  **Step 1: Get SSL**: Click the **"Get SSL"** button. This process may take 10-30 seconds. The interface will display a message like "Successfully retrieved SSL certificate..." upon completion.
-3.  **Step 2: Install SSL**: Immediately after the success message appears, click the **"Install SSL"** button. The interface will show a direct response from the cPanel API. A successful response usually contains details about the installed certificate.
-4.  **Verify**: Visit your website with `https://` to confirm that the certificate is active.
+2.  **Enter Credentials**: Fill in your cPanel Username, Password, and your server's IP address in the provided form.
+3.  **Step 1: Get SSL**: Click the **"Get SSL"** button. This process may take 10-30 seconds. The interface will display a message like "Đã lấy xong chứng chỉ SSL..." (Successfully retrieved SSL certificate...) upon completion.
+4.  **Step 2: Install SSL**: Immediately after the success message appears, click the **"Install SSL"** button. The interface will show a direct response from the cPanel API. A successful response usually contains details about the installed certificate.
+5.  **Verify**: Visit your website with `https://` to confirm that the certificate is active.
 
 ---
 
 ## 6. ⚠️ Security Warning & Best Practices
 
-> **Your security is the top priority.** This tool handles extremely sensitive credentials. Please adhere strictly to the following principles:
-> -   **Never** commit the `config.php` file or any `.pem` files to a public repository.
+> **Your security is the top priority.** This tool requires you to enter your cPanel credentials directly into a web form, which can be a security risk. Please adhere strictly to the following principles:
+> -   **Use HTTPS**: Ensure you are accessing the tool's page (`index.php`) itself over a secure `https://` connection. This encrypts your credentials between your browser and the server.
 > -   **Restrict Access**: Ensure the directory containing this tool is not publicly browsable. Consider placing it under password protection (HTTP Basic Auth).
 > -   **Check File Permissions**: Set permissions for PHP files to `644` and directories to `755` to mitigate security risks.
-> -   **Delete After Use**: If you only need to perform a one-time installation, consider deleting this toolset from your server after a successful SSL installation to reduce the attack surface.
+> -   **Delete After Use**: This is the most important practice. After you have successfully installed the SSL certificate, **delete the entire tool from your server**. This eliminates any risk of the tool being exploited later.
 
 ---
 
