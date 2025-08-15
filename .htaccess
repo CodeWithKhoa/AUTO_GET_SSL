@@ -1,0 +1,11 @@
+<Files "account_key.pem">
+    Require all denied
+</Files>
+
+<Files "fullchain.pem">
+    Require all denied
+</Files>
+
+<Files "private_key.pem">
+    Require all denied
+</Files>
