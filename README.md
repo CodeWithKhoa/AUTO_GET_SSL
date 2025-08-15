@@ -89,7 +89,7 @@ Before you begin, ensure you have:
 ### Installation Steps
 1.  **Clone or download the repository to your hosting:**
     ```bash
-    git clone [https://github.com/CodeWithKhoa/CertPanel.git](https://github.com/CodeWithKhoa/CertPanel.git)
+    git clone https://github.com/CodeWithKhoa/CertPanel.git
     ```
 
 2.  **Navigate into the project directory:**
